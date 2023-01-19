@@ -1,20 +1,23 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:intl/intl.dart';
-
-late Map<String, dynamic> news;
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:news/app_router.dart';
+import 'package:news/models/article_data.dart';
+import 'package:news/models/news_repo.dart';
+import 'package:news/models/news_response_data.dart';
+import 'package:news/models/web_services.dart';
+import 'package:news/news_bloc/news_cubit.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final res = await http.get(Uri.parse(
-      'https://newsapi.org/v2/top-headlines?country=eg&category=business&apiKey=17d26bc7072848a0ad2ff168647a281e'));
-  news = json.decode(res.body) as Map<String, dynamic>;
-  runApp(const MyApp());
+  runApp(MyApp(
+    appRouter: AppRouter(),
+  ));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({super.key, required this.appRouter});
+
+  final AppRouter appRouter;
 
   @override
   Widget build(BuildContext context) {
@@ -24,67 +27,137 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(),
+      onGenerateRoute: appRouter.generateRoute,
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({
-    super.key,
-  });
+  const MyHomePage({super.key});
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  Future<void> updateNews() async {
-    final res = await http.get(Uri.parse(
-        'https://newsapi.org/v2/top-headlines?country=eg&category=business&apiKey=17d26bc7072848a0ad2ff168647a281e'));
-    news = json.decode(res.body) as Map<String, dynamic>;
+  late NewsResponse newsResponse;
+  NewsResponse searchedNews = NewsResponse();
+  bool _isSearching = false;
+  final _searchTextController = TextEditingController();
+
+  Widget _buildSearchField() {
+    return TextField(
+      controller: _searchTextController,
+      onChanged: (searchedText) {
+        addSearchedItemsToSearchedList(searchedText);
+      },
+      decoration: InputDecoration(hintText: 'Search'),
+    );
+  }
+
+  void addSearchedItemsToSearchedList(String searchedText) {
+    searchedNews.articles = newsResponse.articles!
+        .where((element) => element.title!.toLowerCase().contains(searchedText))
+        .toList();
+    setState(() {});
+  }
+
+  List<Widget> _appBarActions() {
+    if (_isSearching) {
+      return [
+        IconButton(
+            onPressed: () {
+              _clearSearch();
+              Navigator.pop(context);
+            },
+            icon: Icon(Icons.clear)),
+      ];
+    } else {
+      return [
+        IconButton(onPressed: startSearch, icon: Icon(Icons.search)),
+      ];
+    }
+  }
+
+  void startSearch() {
+    ModalRoute.of(context)!.addLocalHistoryEntry(
+      LocalHistoryEntry(
+        onRemove: _stopSearching,
+      ),
+    );
+    setState(() {
+      _isSearching = true;
+    });
+  }
+
+  void _stopSearching() {
+    _clearSearch();
+    setState(() {
+      _isSearching = false;
+    });
+  }
+
+  void _clearSearch() {
+    setState(() {
+      _searchTextController.clear();
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    BlocProvider.of<NewsCubit>(context).getAllNews();
+  }
+
+  Widget articel(Articles article) {
+    return Column(
+      children: [
+        Container(
+          child: article.urlToImage == null
+              ? null
+              : Image.network(article.urlToImage!),
+        ),
+        const SizedBox(
+          height: 10,
+        ),
+        Text(
+          article.title!,
+        ),
+        const SizedBox(
+          height: 20,
+        ),
+      ],
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('News'),
+        actions: _appBarActions(),
+        title: _isSearching ? _buildSearchField() : Text('News'),
       ),
       body: RefreshIndicator(
-        onRefresh: updateNews,
-        child: ListView.builder(
-          itemBuilder: (ctx, index) => Column(
-            children: [
-              Container(
-                child: news['articles'][index]['urlToImage']==null?null: Image.network(news['articles'][index]['urlToImage']),
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              Text(
-                news['articles'][index]['title'],
-              ),
-              SizedBox(
-                height: 20,
-              ),
-            ],
-          ),
-          itemCount: news['articles'].length,
+        onRefresh: () async {},
+        child: BlocBuilder<NewsCubit, NewsState>(
+          builder: (context, state) {
+            if (state is NewsLoaded) {
+              newsResponse = state.newsResponse;
+              return ListView.builder(
+                itemBuilder: (ctx, index) => articel(
+                    _searchTextController.text.isEmpty
+                        ? newsResponse.articles![index]
+                        : searchedNews.articles![index]),
+                itemCount: _searchTextController.text.isEmpty
+                    ? newsResponse.articles!.length
+                    : searchedNews.articles?.length,
+              );
+            } else {
+              return const Center(child: CircularProgressIndicator());
+            }
+          },
         ),
       ),
     );
   }
-}
-
-class New {
-  final String author;
-  final String title;
-  final String description;
-  final String url; //url to image
-  final String publishedAt; //try to formate
-  final String content;
-
-  New(this.author, this.title, this.description, this.url, this.publishedAt,
-      this.content); //try to formate
 }
