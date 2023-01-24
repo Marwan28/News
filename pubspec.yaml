@@ -36,6 +36,10 @@ dependencies:
   flutter_bloc:
   equatable:
   dio:
+  url_launcher: ^6.1.7
+  shared_preferences:
+  hive: ^2.2.3
+  hive_flutter:
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -44,6 +48,8 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  build_runner:
+  hive_generator:
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
