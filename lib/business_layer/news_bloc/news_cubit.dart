@@ -141,6 +141,4 @@ class NewsCubit extends Cubit<NewsState> {
 
     return newsResponse;
   }
-
-
 }

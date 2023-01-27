@@ -103,6 +103,10 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         actions: _appBarActions(),
         title: _isSearching ? _buildSearchField() : const Text('News'),
+        leading: IconButton(
+          onPressed: (){Navigator.of(context).pushNamed('/saved');},
+          icon: Icon(Icons.save_outlined),
+        ),
       ),
       body: RefreshIndicator(
         onRefresh: () async {
@@ -204,7 +208,6 @@ class _MyHomePageState extends State<MyHomePage> {
           },
         ),
       ),
-      drawer: const MyDrawer(),
     );
   }
 }

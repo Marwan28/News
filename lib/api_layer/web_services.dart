@@ -7,8 +7,8 @@ class NewsWebServices {
     BaseOptions options = BaseOptions(
       baseUrl: 'https://newsapi.org/v2/top-headlines?',
       receiveDataWhenStatusError: true,
-      connectTimeout: 20 * 1000,
-      receiveTimeout: 20 * 1000,
+      connectTimeout: 30 * 1000,
+      receiveTimeout: 30 * 1000,
     );
     dio = Dio(options);
   }

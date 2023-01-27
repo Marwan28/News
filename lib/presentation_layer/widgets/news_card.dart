@@ -30,155 +30,130 @@ class Article extends StatelessWidget {
     }
   }
 
-  /*
-  * Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40),),
-      elevation: 10,
-      margin: EdgeInsetsDirectional.all(10),
-      child: Container(
-        padding: EdgeInsetsDirectional.fromSTEB(0,0,0,10),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: Colors.grey,
-          ),
-          borderRadius: BorderRadius.circular(40),
-        ),
-        child: Column(
-          children: [
-            Container(
-              child: article.urlToImage == null
-                  ? null
-                  : Image.network(article.urlToImage!,fit: BoxFit.fitHeight,),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            Text(
-              article.title!,
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-          ],
-        ),
-      ),
-    )*/
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(10),
-          bottomRight: Radius.circular(10),
-          topLeft: Radius.circular(10),
-          topRight: Radius.circular(10),
+    return InkWell(
+      onTap: (){
+        Navigator.of(context).pushNamed('/details',arguments: article);
+      },
+      child: Card(
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(10),
+            bottomRight: Radius.circular(10),
+            topLeft: Radius.circular(10),
+            topRight: Radius.circular(10),
+          ),
         ),
-      ),
-      elevation: 10,
-      margin: const EdgeInsetsDirectional.all(10),
-      child: Container(
-        padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
-        child: Column(
-          children: [
-            if (article.urlToImage != null)
-              ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(10),
-                  topRight: Radius.circular(10),
-                ),
-                child: Image.network(
-                  article.urlToImage!,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            Container(
-              margin:
-                  const EdgeInsetsDirectional.only(top: 5, start: 10, end: 10),
-              child: Column(
-                children: [
-                  Container(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.access_time_outlined,
-                              size: 20,
-                            ),
-                            const SizedBox(
-                              width: 5,
-                            ),
-                            Text(
-                              'Time: ${DateFormat('dd-MM-yyyy hh:mm aa').format(DateTime.parse(article.publishedAt!))}',
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                          ],
-                        ),
-                        IconButton(
-                            onPressed: (){
-                              if(inHome){
-                                context.read<NewsCubit>().addNewSavedArticle(article);
-                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('save button pressed',),),);
-                              }else{
-                                context.read<NewsCubit>().deleteSavedArticle(article);
-                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('delete button pressed',),),);
-                              }
-                              },
-                            icon: Icon(inHome?
-                              Icons.save:Icons.delete,
-                              color: Colors.blue,
-                            )),
-                      ],
+        elevation: 10,
+        margin: const EdgeInsetsDirectional.all(10),
+        child: Container(
+          padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
+          child: Column(
+            children: [
+              if (article.urlToImage != null)
+                Hero(
+                  tag: article.urlToImage,
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(10),
+                      topRight: Radius.circular(10),
+                    ),
+                    child: Image.network(
+                      article.urlToImage!,
+                      fit: BoxFit.cover,
                     ),
                   ),
-                  Container(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Row(
+                ),
+              Container(
+                margin:
+                    const EdgeInsetsDirectional.only(top: 5, start: 10, end: 10),
+                child: Column(
+                  children: [
+                    Container(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
                             children: [
                               const Icon(
-                                Icons.source_outlined,
+                                Icons.access_time_outlined,
                                 size: 20,
                               ),
                               const SizedBox(
                                 width: 5,
                               ),
-                              Flexible(
-                                child: Text(
-                                  article.source?.name != null
-                                      ? 'Source: ${article.source!.name}'
-                                      : 'Source: Unknown source',
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
+                              Text(
+                                'Time: ${DateFormat('dd-MM-yyyy hh:mm aa').format(DateTime.parse(article.publishedAt!))}',
+                                style: const TextStyle(fontSize: 16),
                               ),
                             ],
                           ),
-                        ),
-                        TextButton(
-                          onPressed: () async =>
-                              _launchInBrowser(Uri.parse(article.url!)),
-                          child: const Text('Go To'),
-                        ),
-                      ],
+                          IconButton(
+                              onPressed: (){
+                                if(inHome){
+                                  context.read<NewsCubit>().addNewSavedArticle(article);
+                                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('save button pressed',),),);
+                                }else{
+                                  context.read<NewsCubit>().deleteSavedArticle(article);
+                                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('delete button pressed',),),);
+                                }
+                                },
+                              icon: Icon(inHome?
+                                Icons.save:Icons.delete,
+                                color: Colors.blue,
+                              )),
+                        ],
+                      ),
                     ),
-                  ),
-                  Container(
-                    margin: const EdgeInsetsDirectional.only(bottom: 10),
-                    child: Text(
-                      article.title!,
+                    Container(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.source_outlined,
+                                  size: 20,
+                                ),
+                                const SizedBox(
+                                  width: 5,
+                                ),
+                                Flexible(
+                                  child: Text(
+                                    article.source?.name != null
+                                        ? 'Source: ${article.source!.name}'
+                                        : 'Source: Unknown source',
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () async =>
+                                _launchInBrowser(Uri.parse(article.url!)),
+                            child: const Text('Go To'),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                    Container(
+                      margin: const EdgeInsetsDirectional.only(bottom: 10),
+                      child: Text(
+                        article.title!,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

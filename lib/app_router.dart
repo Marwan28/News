@@ -8,6 +8,7 @@ import 'package:news/presentation_layer/screens/saved_articles_screen.dart';
 import 'api_layer/news_repo.dart';
 import 'api_layer/web_services.dart';
 import 'business_layer/news_bloc/news_cubit.dart';
+import 'presentation_layer/screens/article_details_screen.dart';
 
 class AppRouter {
   late NewsRepo newsRepo;
@@ -18,24 +19,29 @@ class AppRouter {
     newsCubit = NewsCubit(newsRepo);
   }
 
+
   Route? generateRoute(RouteSettings settings) {
     switch (settings.name) {
       case '/':
         return MaterialPageRoute(
-          builder: (_) => BlocProvider(
-            create: (context) => newsCubit,
+          builder: (context) => BlocProvider<NewsCubit>.value(
+            value: newsCubit,
             child: const MyHomePage(),
           ),
         );
       case '/saved':
         return MaterialPageRoute(
-          builder: (_) => BlocProvider(
-            create: (context) => newsCubit,
+          builder: (context) => BlocProvider.value(
+            value: newsCubit,
             child: const SavedArticlesScreen(),
           ),
         );
-      default:
-        return MaterialPageRoute(builder: (_) => const MyHomePage());
+      case '/details':
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (context) => const ArticleDetailsScreen(),
+        );
     }
+    return null;
   }
 }
